@@ -1,0 +1,13 @@
+@startuml
+actor Customer
+participant BankService
+participant AccountService
+participant AccountRepository
+
+Customer -> BankService : openAccount()
+BankService -> AccountService : createAccount(user, type, amount)
+AccountService -> AccountRepository : save(account)
+AccountRepository --> AccountService : account saved
+AccountService --> BankService : account creation message
+BankService --> Customer : display success/failure
+@enduml

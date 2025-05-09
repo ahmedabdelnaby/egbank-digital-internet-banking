@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: egbank-digital-internet-banking
+  datasource:
+    url: jdbc:mysql://localhost:3306/eg_banking_system
+    username: root
+    password: password
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    properties:
+      hibernate:
+        format_sql: true

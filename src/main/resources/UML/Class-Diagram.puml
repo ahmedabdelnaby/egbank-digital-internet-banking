@@ -1,0 +1,103 @@
+@startuml
+' Packages (optional for grouping)
+package "EG-Bank-Models" {
+    package "Users" {
+      abstract class User {
+        - id: Long
+        - username: String
+        - password: String
+        - name: String
+        - email: String
+        - active: boolean
+        - loggedIn: boolean
+      }
+
+      class Customer {
+        - address: String
+        - accounts: List<Account>
+      }
+
+      class Employee {
+        - employeeId: String
+        - position: String
+      }
+
+      class Admin {
+        - securityClearance: String
+        - adminPrivileges: String
+      }
+
+      User <|-- Customer
+      User <|-- Employee
+      Employee <|-- Admin
+    }
+
+    package "Account" {
+      abstract class Account {
+        - id: Long
+        - accountNumber: String
+        - balance: Double
+        - status: AccountStatus
+        - owner: User
+        - transactions: List<Transaction>
+        + withdraw(amount: double): String
+      }
+
+      class CheckingAccount {
+        + withdraw(amount: double): String
+      }
+
+      class SavingsAccount {
+        - withdrawalsThisMonth: int
+        + withdraw(amount: double): String
+        + withdraw(amount: double, limit: int, minBalance: double): String
+      }
+
+      Account <|-- CheckingAccount
+      Account <|-- SavingsAccount
+      User "1" -- "*" Account : owns >
+      Account "1" -- "*" Transaction : initiates >
+
+      enum AccountStatus {
+        ACTIVE
+        INACTIVE
+        FROZEN
+      }
+    }
+
+    package "Transaction" {
+      class Transaction {
+        - id: Long
+        - transactionId: String
+        - transactionDate: LocalDateTime
+        - type: TransactionType
+        - amount: double
+        - status: TransactionStatus
+        - sourceAccount: Account
+        - destinationAccount: Account
+      }
+
+      enum TransactionType {
+        DEPOSIT
+        WITHDRAWAL
+        TRANSFER
+      }
+
+      enum TransactionStatus {
+        COMPLETED
+        FAILED
+        PENDING
+      }
+
+      Transaction "1" --> "1" Account : source >
+      Transaction "0..1" --> "1" Account : destination >
+    }
+
+    package "Configuration" {
+      class SystemConfig {
+        - configKey: String
+        - configValue: String
+      }
+    }
+}
+@enduml
