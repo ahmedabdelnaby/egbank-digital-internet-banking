@@ -27,9 +27,6 @@ public class SavingsAccount extends Account {
                         "Withdrawal would bring balance below minimum required $" + minimumBalance + "." :
                         withdraw(amount);
 
-        this.setBalance(this.getBalance() - amount);
-        withdrawalsThisMonth++;
-
         return msg;
     }
 }

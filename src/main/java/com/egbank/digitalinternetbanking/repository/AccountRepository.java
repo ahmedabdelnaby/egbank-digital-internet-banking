@@ -11,4 +11,6 @@ import java.util.List;
 @Transactional
 public interface AccountRepository extends JpaRepository<Account, Long> {
     List<Account> findByOwner(User owner);
+
+    Account findAccountByAccountNumber(String accountNumber);
 }

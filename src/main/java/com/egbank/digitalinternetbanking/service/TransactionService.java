@@ -28,24 +28,39 @@ public class TransactionService {
         this.configService = configService;
     }
 
-    public String deposit(Long accId, Double amount) {
+
+    private boolean validateAmount(Double amount) {
+        if (amount == null || amount <= 0) {
+            return false;
+        }
+        return true;
+    }
+
+    public String deposit(Long accId, Double amount) throws IllegalArgumentException {
+        if (!validateAmount(amount)) {
+            throw new IllegalArgumentException();
+        }
+
         return accountService.findAccountById(accId).map(account -> {
             account.setBalance(account.getBalance() + amount);
             accountService.insertAccount(account);
             saveTransaction(Transaction.TransactionType.DEPOSIT,
                                                amount, account, null,
                                                 Transaction.TransactionStatus.COMPLETED);
-            return "Deposit successful.";
+            return String.format("%s - Date: %s, Balance: $%.2f", "Deposit successful.", new Date(), account.getBalance());
         }).orElse("Account not found.");
     }
 
-    public String withdraw(Long accountId, Double amount) {
+    public String withdraw(Long accountId, Double amount) throws IllegalArgumentException {
+        if (!validateAmount(amount)) {
+            throw new IllegalArgumentException();
+        }
+
         double minBalance = configService.getSavingsAccMinBalance();
         int withdrawalLimit = configService.getSavingsAccWithdrawalLimit();
 
         return accountService.findAccountById(accountId).map(account -> {
             String msg = "";
-            // withdraw based on the account type
             if (account instanceof SavingsAccount savingsAccount) {
                 msg = savingsAccount.withdraw(amount,
                         withdrawalLimit,
@@ -61,7 +76,11 @@ public class TransactionService {
         }).orElse("Account not found.");
     }
 
-    public String transfer(Long sourceId, Long destId, Double amount) {
+    public String transfer(Long sourceId, Long destId, Double amount) throws IllegalArgumentException {
+        if (!validateAmount(amount)) {
+            throw new IllegalArgumentException();
+        }
+
         Optional<Account> fromOpt = accountService.findAccountById(sourceId);
         Optional<Account> toOpt = accountService.findAccountById(destId);
 
@@ -95,7 +114,7 @@ public class TransactionService {
                 .orElse(Collections.emptyList());
     }
 
-    private void saveTransaction(Transaction.TransactionType type, Double amount,
+    public void saveTransaction(Transaction.TransactionType type, Double amount,
                                                     Account from, Account to, Transaction.TransactionStatus status) {
         Transaction transaction = new Transaction();
         transaction.setType(type);

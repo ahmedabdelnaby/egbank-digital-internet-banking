@@ -19,12 +19,20 @@ public class AccountService {
         this.accountRepository = accountRepository;
     }
 
+    public void insertAccount(Account account) {
+        accountRepository.save(account);
+    }
+
     public Optional<Account> findAccountById(Long accId) {
         return accountRepository.findById(accId);
     }
 
     public List<Account> getAllAccounts() {
         return accountRepository.findAll();
+    }
+
+    public Account getAccountByAccountNumber(String accNum) {
+        return accountRepository.findAccountByAccountNumber(accNum);
     }
 
     public String createAccount(User user, String accountType, Double initialDeposit) {
@@ -76,9 +84,5 @@ public class AccountService {
                     accountRepository.save(a);
                     return "Account status updated.";
                 }).orElse("Account not found.");
-    }
-
-    public void insertAccount(Account account) {
-        accountRepository.save(account);
     }
 }

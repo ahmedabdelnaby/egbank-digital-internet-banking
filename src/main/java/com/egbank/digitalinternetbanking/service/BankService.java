@@ -367,61 +367,90 @@ public class BankService {
             String accNum = scanner.nextLine();
             System.out.print("Enter amount: ");
             BigDecimal amount = new BigDecimal(scanner.nextLine());
-            if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-                System.out.println("Invalid amount. Please enter a numeric value greater than zero.");
-                return;
-            }
 
             accountService.viewAccounts(currentUser).stream()
                     .filter(a -> a.getAccountNumber().equals(accNum))
+                    .filter(a -> a.getStatus() == Account.AccountStatus.ACTIVE)
                     .findFirst()
                     .ifPresentOrElse(
                             acc -> System.out.println(transactionService.deposit(
                                     acc.getId(), amount.doubleValue())),
-                            () -> System.out.println("Invalid account.")
+                            () -> {
+                                                transactionService.saveTransaction(Transaction.TransactionType.DEPOSIT,
+                                                                                    amount.doubleValue(),
+                                                                                    accountService.getAccountByAccountNumber(accNum),
+                                                                                    null,
+                                                                                    Transaction.TransactionStatus.FAILED);
+                                System.out.println("Invalid account or it may be not active.");
+                            }
                     );
-        } catch (NumberFormatException e) {
-            System.out.println("Invalid input. Please enter a valid numeric value.");
+        } catch (IllegalArgumentException e) {
+            System.out.println("Invalid amount. Please enter a numeric value greater than zero.");
         }
     }
 
     private void withdrawFlow() {
-        System.out.print("Enter Account Number: ");
-        String accNum = scanner.nextLine();
-        System.out.print("Enter amount: ");
-        BigDecimal amount = new BigDecimal(scanner.nextLine());
-        accountService.viewAccounts(currentUser).stream()
-                .filter(a -> a.getAccountNumber().equals(accNum))
-                .findFirst()
-                .ifPresentOrElse(
-                        acc -> System.out.println(transactionService.withdraw(
-                                                                            acc.getId(), amount.doubleValue())),
-                        () -> System.out.println("Invalid account.")
-                );
+        try {
+            System.out.print("Enter Account Number: ");
+            String accNum = scanner.nextLine();
+            System.out.print("Enter amount: ");
+            BigDecimal amount = new BigDecimal(scanner.nextLine());
+
+            accountService.viewAccounts(currentUser).stream()
+                    .filter(a -> a.getAccountNumber().equals(accNum))
+                    .filter(a -> a.getStatus() == Account.AccountStatus.ACTIVE)
+                    .findFirst()
+                    .ifPresentOrElse(
+                            acc -> System.out.println(transactionService.withdraw(
+                                    acc.getId(), amount.doubleValue())),
+                            () -> {
+                                transactionService.saveTransaction(Transaction.TransactionType.WITHDRAWAL,
+                                                                    amount.doubleValue(),
+                                                                    accountService.getAccountByAccountNumber(accNum),
+                                                                    null,
+                                                                    Transaction.TransactionStatus.FAILED);
+                                System.out.println("Invalid account or it may be not active.");
+                            }
+                    );
+        } catch (IllegalArgumentException e) {
+            System.out.println("Invalid amount. Please enter a numeric value greater than zero.");
+        }
     }
 
     private void transferFlow() {
-        System.out.print("From Account Number: ");
-        String from = scanner.nextLine();
-        System.out.print("To Account Number: ");
-        String to = scanner.nextLine();
-        System.out.print("Amount: ");
-        BigDecimal amount = new BigDecimal(scanner.nextLine());
+        try {
+            System.out.print("From Account Number: ");
+            String from = scanner.nextLine();
+            System.out.print("To Account Number: ");
+            String to = scanner.nextLine();
+            System.out.print("Amount: ");
+            BigDecimal amount = new BigDecimal(scanner.nextLine());
 
-        Optional<Account> fromAcc = accountService.viewAccounts(currentUser).stream()
-                                                    .filter(a -> a.getAccountNumber().equals(from)).findFirst();
+            Optional<Account> fromAcc = accountService.viewAccounts(currentUser).stream()
+                                                        .filter(a -> a.getAccountNumber().equals(from)).findFirst()
+                                                        .filter(a -> a.getStatus() == Account.AccountStatus.ACTIVE);
 
-        Optional<Account> toAcc = accountService.getAllAccounts().stream()
-                                                    .filter(a -> a.getAccountNumber().equals(to)).findFirst();
+            Optional<Account> toAcc = accountService.getAllAccounts().stream()
+                                                        .filter(a -> a.getAccountNumber().equals(to)).findFirst()
+                                                        .filter(a -> a.getStatus() == Account.AccountStatus.ACTIVE);
 
-        if (fromAcc.isPresent() && toAcc.isPresent())
-            System.out.println(transactionService.transfer(
-                                                fromAcc.get().getId(),
-                                                  toAcc.get().getId(),
-                                                 amount.doubleValue())
-            );
-        else
-            System.out.println("Invalid account(s).");
+            if (fromAcc.isPresent() && toAcc.isPresent()) {
+                System.out.println(transactionService.transfer(
+                                                    fromAcc.get().getId(),
+                                                      toAcc.get().getId(),
+                                                     amount.doubleValue())
+                );
+            } else {
+                transactionService.saveTransaction(Transaction.TransactionType.TRANSFER,
+                                                    amount.doubleValue(),
+                                                    accountService.getAccountByAccountNumber(from),
+                                                    accountService.getAccountByAccountNumber(to),
+                                                    Transaction.TransactionStatus.FAILED);
+                System.out.println("Invalid account or it may be not active.");
+            }
+        } catch (IllegalArgumentException e) {
+            System.out.println("Invalid amount. Please enter a numeric value greater than zero.");
+        }
     }
 
     private void transactionHistoryFlow() {
