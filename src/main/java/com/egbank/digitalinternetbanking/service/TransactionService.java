@@ -41,7 +41,7 @@ public class TransactionService {
             throw new IllegalArgumentException();
         }
 
-        return accountService.findAccountById(accId).map(account -> {
+        return accountService.getAccountById(accId).map(account -> {
             account.setBalance(account.getBalance() + amount);
             accountService.insertAccount(account);
             saveTransaction(Transaction.TransactionType.DEPOSIT,
@@ -59,7 +59,7 @@ public class TransactionService {
         double minBalance = configService.getSavingsAccMinBalance();
         int withdrawalLimit = configService.getSavingsAccWithdrawalLimit();
 
-        return accountService.findAccountById(accountId).map(account -> {
+        return accountService.getAccountById(accountId).map(account -> {
             String msg = "";
             if (account instanceof SavingsAccount savingsAccount) {
                 msg = savingsAccount.withdraw(amount,
@@ -81,8 +81,8 @@ public class TransactionService {
             throw new IllegalArgumentException();
         }
 
-        Optional<Account> fromOpt = accountService.findAccountById(sourceId);
-        Optional<Account> toOpt = accountService.findAccountById(destId);
+        Optional<Account> fromOpt = accountService.getAccountById(sourceId);
+        Optional<Account> toOpt = accountService.getAccountById(destId);
 
         if (fromOpt.isEmpty() || toOpt.isEmpty()) return "Invalid account(s).";
 
@@ -109,7 +109,7 @@ public class TransactionService {
     }
 
     public List<Transaction> viewTransactions(Long accountId) {
-        return accountService.findAccountById(accountId)
+        return accountService.getAccountById(accountId)
                 .map(transactionRepository::findBySourceAccount)
                 .orElse(Collections.emptyList());
     }
@@ -126,7 +126,7 @@ public class TransactionService {
     }
 
     public List<Transaction> getLastTransactions(Long accountId, int limit) {
-        return accountService.findAccountById(accountId)
+        return accountService.getAccountById(accountId)
                 .map(account -> transactionRepository.findBySourceAccount(account).stream()
                         .sorted(Comparator.comparing(Transaction::getTransactionDate).reversed())
                         .limit(limit)

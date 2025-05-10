@@ -126,7 +126,6 @@ public class BankService {
         transactionService.getAllSystemTransactions()
                 .stream()
                 .sorted(Comparator.comparing(Transaction::getTransactionDate).reversed())
-                .limit(20)
                 .forEach(t -> System.out.printf("Date: %s | Type: %s | Amount: $%.2f | From: %s | To: %s | Status: (%s)%n",
                         t.getTransactionDate(),
                         t.getType(),
@@ -152,8 +151,8 @@ public class BankService {
                 case "3" -> switchUserFlow(true);
                 case "4" -> switchUserFlow(false);
                 case "5" -> userService.getAllUsers().forEach(u ->
-                        System.out.printf("ID: %d | %s (%s) | Active: %b%n",
-                                u.getId(), u.getUsername(), getUserRole(u), u.isActive()));
+                        System.out.printf("ID: %d | Name: %s | Username: %s (%s) | Active: %b%n",
+                                u.getId(), u.getName(), u.getUsername(), getUserRole(u), u.isActive()));
                 case "6" -> { return; }
                 default  -> System.out.println("Invalid choice.");
             }
@@ -381,7 +380,7 @@ public class BankService {
                                                                                     accountService.getAccountByAccountNumber(accNum),
                                                                                     null,
                                                                                     Transaction.TransactionStatus.FAILED);
-                                System.out.println("Invalid account or it may be not active.");
+                                System.out.println("Invalid account or you do not have access to this account or it does not active.");
                             }
                     );
         } catch (IllegalArgumentException e) {
@@ -409,7 +408,7 @@ public class BankService {
                                                                     accountService.getAccountByAccountNumber(accNum),
                                                                     null,
                                                                     Transaction.TransactionStatus.FAILED);
-                                System.out.println("Invalid account or it may be not active.");
+                                System.out.println("Invalid account or you do not have access to this account or it does not active.");
                             }
                     );
         } catch (IllegalArgumentException e) {
@@ -446,7 +445,7 @@ public class BankService {
                                                     accountService.getAccountByAccountNumber(from),
                                                     accountService.getAccountByAccountNumber(to),
                                                     Transaction.TransactionStatus.FAILED);
-                System.out.println("Invalid account or it may be not active.");
+                System.out.println("Invalid account or you do not have access to this account or it does not active.");
             }
         } catch (IllegalArgumentException e) {
             System.out.println("Invalid amount. Please enter a numeric value greater than zero.");
@@ -462,7 +461,7 @@ public class BankService {
                 .ifPresentOrElse(
                         acc -> transactionService.viewTransactions(acc.getId())
                                 .stream()
-                                .limit(10)
+                                .sorted(Comparator.comparing(Transaction::getTransactionDate).reversed())
                                 .forEach(t -> System.out.printf("[%s] %s: $%.2f → %s%n",
                                                     t.getTransactionDate(), t.getType(), t.getAmount(), t.getStatus())),
                         () -> System.out.println("Account not found.")
@@ -478,6 +477,8 @@ public class BankService {
                     System.out.println(accountService.getAccountSummary(acc));
                     System.out.println("\nRecent Transactions:");
                     transactionService.getLastTransactions(acc.getId(), 10)
+                            .stream()
+                            .sorted(Comparator.comparing(Transaction::getTransactionDate).reversed())
                             .forEach(t -> System.out.printf("[%s] %s: $%.2f → %s%n",
                                     t.getTransactionDate(), t.getType(), t.getAmount(), t.getStatus()));
                 }, () -> System.out.println("Account not found or access denied."));

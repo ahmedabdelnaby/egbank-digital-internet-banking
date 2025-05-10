@@ -23,14 +23,6 @@ public class ConfigService {
         );
     }
 
-    public double getSavingsAccInterestRate() {
-        return Double.parseDouble(
-                systemConfigRepository.findById("SAVINGS_INTEREST_RATE")
-                        .map(SystemConfig::getConfigValue)
-                        .orElse("2.0")
-        );
-    }
-
     public int getSavingsAccWithdrawalLimit() {
         return Integer.parseInt(
                 systemConfigRepository.findById("SAVINGS_WITHDRAWAL_LIMIT")

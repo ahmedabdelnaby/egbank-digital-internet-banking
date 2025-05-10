@@ -23,7 +23,7 @@ public class AccountService {
         accountRepository.save(account);
     }
 
-    public Optional<Account> findAccountById(Long accId) {
+    public Optional<Account> getAccountById(Long accId) {
         return accountRepository.findById(accId);
     }
 
