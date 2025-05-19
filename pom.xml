@@ -11,7 +11,7 @@
 
 	<groupId>com.egbank.digitalinternetbanking</groupId>
 	<artifactId>egbank-digital-internet-banking</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<name>egbank-digital-internet-banking</name>
 	<description>A simple console digital internet banking application for EG-Bank.</description>
 

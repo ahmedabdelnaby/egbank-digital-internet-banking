@@ -2,14 +2,14 @@
 ------------------------------------------------------------------
 ----------------------------- Schema -----------------------------
 ------------------------------------------------------------------
-DROP DATABASE eg_banking_system;
+DROP DATABASE IF EXISTS eg_banking_system;
 CREATE DATABASE eg_banking_system;
 USE eg_banking_system;
 
 ------------------------------------------------------------------
 ----------------------------- Tables -----------------------------
 ------------------------------------------------------------------
-CREATE TABLE SYSTEM_CONFIGS (
+CREATE TABLE IF NOT EXISTS SYSTEM_CONFIGS (
     CONFIG_KEY VARCHAR(50) PRIMARY KEY,
     CONFIG_VALUE VARCHAR(100)
 );

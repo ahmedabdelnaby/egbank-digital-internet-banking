@@ -1,6 +1,7 @@
 spring:
   application:
     name: egbank-digital-internet-banking
+    version: v1.0.0
   datasource:
     url: jdbc:mysql://localhost:3306/eg_banking_system
     username: root
